@@ -11,5 +11,4 @@ git clone https://github.com/saravenpi/speed_typing_test
 cd speed_typing_test
 npm install
 npm start
-
 ```

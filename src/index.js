@@ -1,24 +1,30 @@
 import chalk from 'chalk' 
 import readlineSync from 'readline-sync'
+import fs from 'fs'
 
-const error = chalk.bold.red
+var wordList = []
+try {
+    const data = fs.readFileSync('wordlist_en.txt', 'UTF-8');
+
+    const words = data.split(/\r?\n/);
+
+    words.forEach((word) => {
+      wordList.push(word)
+    });
+
+} catch (err) {
+    console.error(err);
+}
+
 const warning = chalk.hex('#FFA500')
 const success = chalk.bold.green
-
-const textsToType = ['hello this is a test', 'je mange de la salade', "j'aime les gens, c'est cool", 'je suis un poisson', "vers l'infini et l'au dela", "je vis dans l'ocean", "j'aime les algues"]  
-let key
+var textToType = ''
 var letterPosition = 0
-const textToType = textsToType[Math.floor(Math.random() * textsToType.length)];
 var typedText = ''
 var displayText = []
-var startTime, endTime
-var startedTyping = false;
-var errorLine = []
+var startTime, endTime, key
+var startedTyping = false
 
-for (var i = 0; i < textToType.length; i++)
-{
-  errorLine.push(' ')
-}
 function start() {
   startTime = performance.now()
 };
@@ -41,22 +47,29 @@ function displayArray(textArray){
   console.log('\x1B[1A\x1B[K' + textToDisplay)
 }
 
+
+for (var i = 0; i < 6; i++) {
+  textToType += wordList[Math.floor(Math.random() * wordList.length)] + " "
+}
+textToType += wordList[Math.floor(Math.random() * wordList.length)]
+
 for (var i = 0; i < textToType.length; i++) {
   displayText.push(textToType[i])
 }
 
 console.log('\x1B[1A\x1B[K' + textToType)
 
+
 while (typedText != textToType) {
   
-  key = readlineSync.keyIn('',
-    {hideEchoBack: true, mask: ''});
+  key = readlineSync.keyIn('', {hideEchoBack: true, mask: ''})
 
   if (!startedTyping)
   {
     start()
     startedTyping = true
   }
+
   if (textToType[letterPosition] == key) {
     displayText[letterPosition] = success(key)
     typedText += key
@@ -71,6 +84,5 @@ while (typedText != textToType) {
 
 
 var finalTime = end()
-console.log("TIME ELAPSED: " + warning(finalTime) + "s")
-console.log(success(Math.round(textToType.length/5)/(finalTime/60) + warning(" WPM")))
-console.log(success("WELL DONE !"))
+console.log(warning("* TIME ELAPSED: ") + success(finalTime) + " seconds")
+console.log(warning("* WPM: ") + success((textToType.length / 5) / (finalTime / 60)))
