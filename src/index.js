@@ -1,6 +1,8 @@
 import chalk from 'chalk' 
 import readlineSync from 'readline-sync'
 import fs from 'fs'
+import hideCursor from 'hide-terminal-cursor'
+ 
 
 var wordList = []
 try {
@@ -18,6 +20,8 @@ try {
 
 const warning = chalk.hex('#FFA500')
 const success = chalk.bold.green
+const underline = chalk.underline
+
 var textToType = ''
 var letterPosition = 0
 var typedText = ''
@@ -48,20 +52,24 @@ function displayArray(textArray){
 }
 
 
-for (var i = 0; i < 6; i++) {
+for (var i = 0; i < 15; i++) {
   textToType += wordList[Math.floor(Math.random() * wordList.length)] + " "
 }
 textToType += wordList[Math.floor(Math.random() * wordList.length)]
 
-for (var i = 0; i < textToType.length; i++) {
+
+displayText.push(underline(textToType[0]))
+for (var i = 1; i < textToType.length; i++) {
   displayText.push(textToType[i])
 }
 
-console.log('\x1B[1A\x1B[K' + textToType)
+hideCursor()
+
+console.log("\x1B[1A\x1B[KPress a key to start the timer")
+displayArray(displayText)
 
 
 while (typedText != textToType) {
-  
   key = readlineSync.keyIn('', {hideEchoBack: true, mask: ''})
 
   if (!startedTyping)
@@ -73,16 +81,20 @@ while (typedText != textToType) {
   if (textToType[letterPosition] == key) {
     displayText[letterPosition] = success(key)
     typedText += key
-    letterPosition++
+
+    if (letterPosition < textToType.length - 1) {
+      letterPosition++
+      displayText[letterPosition] = underline(displayText[letterPosition])
+    }
   }
   else {
-      displayText[letterPosition] = warning(textToType[letterPosition])
+      displayText[letterPosition] = underline(warning(textToType[letterPosition]))
   }
 
   displayArray(displayText)
 }
 
-
 var finalTime = end()
+
 console.log(warning("* TIME ELAPSED: ") + success(finalTime) + " seconds")
 console.log(warning("* WPM: ") + success((textToType.length / 5) / (finalTime / 60)))

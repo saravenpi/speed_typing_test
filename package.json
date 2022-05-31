@@ -1,18 +1,17 @@
 {
-  "name": "banana_type",
+  "name": "speed_typing_test",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node src/index.js",
-    "test": "node test.js"
+    "start": "node src/index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "chalk": "^5.0.1",
-    "prompt-sync": "^4.2.0",
+    "hide-terminal-cursor": "^0.0.1",
     "readline-sync": "^1.4.10"
   }
 }
