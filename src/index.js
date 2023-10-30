@@ -1,100 +1,100 @@
-import chalk from 'chalk' 
+import chalk from 'chalk'
 import readlineSync from 'readline-sync'
 import fs from 'fs'
 import hideCursor from 'hide-terminal-cursor'
- 
+import { start } from 'repl'
 
-var wordList = []
-try {
-    const data = fs.readFileSync('wordlist_en.txt', 'UTF-8');
-
-    const words = data.split(/\r?\n/);
-
-    words.forEach((word) => {
-      wordList.push(word)
-    });
-
-} catch (err) {
-    console.error(err);
-}
-
-const warning = chalk.hex('#FFA500')
+const warning = chalk.hex("#FFA500")
 const success = chalk.bold.green
 const underline = chalk.underline
 
-var textToType = ''
-var letterPosition = 0
-var typedText = ''
-var displayText = []
-var startTime, endTime, key
-var startedTyping = false
+function loadWordList() {
+  var wordList = [];
+  try {
+    const data = fs.readFileSync("wordlist_en.txt", "UTF-8");
+    const words = data.split(/\r?\n/);
 
-function start() {
-  startTime = performance.now()
-};
+    words.forEach((word) => wordList.push(word));
 
-function end() {
-  endTime = performance.now()
-  var timeDiff = endTime - startTime
-  timeDiff /= 1000
-  var seconds = timeDiff
-  return seconds
-}
-
-function displayArray(textArray){
-  var textToDisplay = ''
-
-  for (var i = 0; i < textArray.length; i++) {
-    textToDisplay += textArray[i]
+    return wordList;
+  } catch (error) {
+    console.log(error);
   }
-  
-  console.log('\x1B[1A\x1B[K' + textToDisplay)
 }
 
+function getEndTime(startTime) {
+  var endTime = performance.now();
+  var timeDiff = endTime - startTime;
+  timeDiff /= 1000;
+  var seconds = timeDiff;
 
-for (var i = 0; i < 15; i++) {
-  textToType += wordList[Math.floor(Math.random() * wordList.length)] + " "
-}
-textToType += wordList[Math.floor(Math.random() * wordList.length)]
-
-
-displayText.push(underline(textToType[0]))
-for (var i = 1; i < textToType.length; i++) {
-  displayText.push(textToType[i])
+  return seconds;
 }
 
-hideCursor()
+function displayArray(textArray) {
+  var textToDisplay = "";
 
-console.log("\x1B[1A\x1B[KPress a key to start the timer")
-displayArray(displayText)
+  for (var i = 0; i < textArray.length; i++) textToDisplay += textArray[i];
+  console.log("\x1B[1A\x1B[K" + textToDisplay);
+}
 
+function generateTypingTest(wordList) {
+  var typingTest = {
+    textToType: "",
+    displayText: [],
+  };
 
-while (typedText != textToType) {
-  key = readlineSync.keyIn('', {hideEchoBack: true, mask: ''})
+  for (var i = 0; i < 15; i++)
+    typingTest.textToType +=
+      wordList[Math.floor(Math.random() * wordList.length)] + " ";
+  typingTest.textToType +=
+    wordList[Math.floor(Math.random() * wordList.length)];
+  typingTest.displayText.push(underline(typingTest.textToType[0]));
+  for (var i = 1; i < typingTest.textToType.length; i++)
+    typingTest.displayText.push(typingTest.textToType[i]);
 
-  if (!startedTyping)
-  {
-    start()
-    startedTyping = true
-  }
+  return typingTest;
+}
 
-  if (textToType[letterPosition] == key) {
-    displayText[letterPosition] = success(key)
-    typedText += key
+function speedTypingTest() {
+  var wordList = loadWordList();
+  var typingTest = generateTypingTest(wordList);
+  var letterPosition = 0;
+  var typedText = "";
+  var startTime;
+  var startedTyping = false;
+  var key = "";
 
-    if (letterPosition < textToType.length - 1) {
-      letterPosition++
-      displayText[letterPosition] = underline(displayText[letterPosition])
+  hideCursor();
+  console.log("\x1B[1A\x1B[KPress a key to start the timer");
+  displayArray(typingTest.displayText);
+  while (typedText != typingTest.textToType) {
+    key = readlineSync.keyIn("", { hideEchoBack: true, mask: "" });
+    if (!startedTyping) {
+      startTime = performance.now()
+      startedTyping = true;
     }
+    if (typingTest.textToType[letterPosition] == key) {
+      typingTest.displayText[letterPosition] = success(key);
+      typedText += key;
+      if (letterPosition < typingTest.textToType.length - 1) {
+        letterPosition++;
+        typingTest.displayText[letterPosition] = underline(
+          typingTest.displayText[letterPosition]
+        );
+      }
+    } else
+      typingTest.displayText[letterPosition] = underline(
+        warning(typingTest.textToType[letterPosition])
+      );
+    displayArray(typingTest.displayText);
   }
-  else {
-      displayText[letterPosition] = underline(warning(textToType[letterPosition]))
-  }
-
-  displayArray(displayText)
+  var finalTime = getEndTime(startTime);
+  console.log(warning("* TIME ELAPSED: ") + success(finalTime) + " seconds");
+  console.log(
+    warning("* WPM: ") +
+      success(typingTest.textToType.length / 5 / (finalTime / 60))
+  );
 }
 
-var finalTime = end()
-
-console.log(warning("* TIME ELAPSED: ") + success(finalTime) + " seconds")
-console.log(warning("* WPM: ") + success((textToType.length / 5) / (finalTime / 60)))
+speedTypingTest();
