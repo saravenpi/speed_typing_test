@@ -2,7 +2,6 @@ import chalk from 'chalk'
 import readlineSync from 'readline-sync'
 import fs from 'fs'
 import hideCursor from 'hide-terminal-cursor'
-import { start } from 'repl'
 
 const warning = chalk.hex("#FFA500")
 const success = chalk.bold.green
